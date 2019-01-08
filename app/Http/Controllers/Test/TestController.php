@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers\Test;
 
+use App\Model\UserModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-use DB;
 
+use DB;
 class TestController extends Controller
 {
     //
+
+    public function abc()
+    {
+        var_dump($_POST);echo '</br>';
+        var_dump($_GET);echo '</br>';
+    }
 
 	public function world1()
 	{
@@ -25,7 +32,7 @@ class TestController extends Controller
 
 	public function world2()
 	{
-		echo __METHOD__;
+		header('Location:http://www.baidu.com');
 	}
 
 	public function md($m,$d)
@@ -56,4 +63,56 @@ class TestController extends Controller
 
 
 	}
+
+
+	public function viewTest1()
+    {
+        $data = [];
+        return view('test.index',$data);
+    }
+
+    public function viewTest2()
+    {
+        $list = UserModel::all()->toArray();
+        //echo '<pre>';print_r($list);echo '</pre>';
+
+        $data = [
+            'title'     => 'XXXX',
+            'list'      => $list
+        ];
+
+        return view('test.child',$data);
+    }
+
+    /**
+     * Cookie 测试
+     * 2019年1月4日13:25:50
+     */
+    public function cookieTest1()
+    {
+        setcookie('cookie1','lening',time()+1200,'/','lening.com',false,true);
+        echo '<pre>';print_r($_COOKIE);echo '</pre>';
+    }
+
+    public function cookieTest2()
+    {
+        echo '<pre>';print_r($_COOKIE);echo '</pre>';
+    }
+
+    public function sessionTest(Request $request)
+    {
+        $request->session()->put('aaa','aaaaaa');
+        echo '<pre>';print_r($request->session()->all());echo '</pre>';
+        //echo '<pre>';print_r(Session::all());echo '</pre>';
+    }
+
+    public function mid1()
+    {
+        echo __METHOD__;
+    }
+
+    public function checkCookie()
+    {
+        echo __METHOD__;
+    }
 }
