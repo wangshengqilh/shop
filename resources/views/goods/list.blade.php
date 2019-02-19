@@ -1,23 +1,20 @@
 @extends('layouts.bst')
+
 @section('content')
-    <table border="1">
-        <tr>
-            <td>商品名称</td>
-            <td>商品价格</td>
-            <td>商品库存</td>
-            <td>操作</td>
-        </tr>
-        @foreach($list as $v)
-        <tr>
-            <td>{{$v->goods_name}}</td>
-            <td>{{$v->price}}</td>
-            <td>{{$v->store}}</td>
-            <td><a href="/goods/{{$v->goods_id}}">详情</a></td>
-        </tr>
-        @endforeach
-    </table>
-    <a href="/cart" class="btn btn-info ">进入购物车</a>
+    <div class="container">
+        <ul>
+            <input type="text" id="name"><input type="button" value="搜索" id="sou">
+            @foreach($list as $k=>$v)
+                <li> 商品ID：{{$v->goods_id}}  --  商品价格：¥ {{$v->price}}
+                    <a href="/goods/detail/{{$v->goods_id}}" >{{$v->goods_name}}</a><br><br>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+    {{$list->links()}}
 @endsection
+<button>座位1</button><button>座位2</button><button>座位3</button><button>座位4</button><button>座位5</button><button>座位6</button><button>座位7</button><button>座位8</button><button>座位9</button><button>座位10</button><button>座位11</button><button>座位12</button><button>座位13</button><button>座位14</button><button>座位15</button><button>座位16</button><button>座位17</button>
+
 @section('footer')
     @parent
     <script src="{{URL::asset('/js/goods/goods.js')}}"></script>

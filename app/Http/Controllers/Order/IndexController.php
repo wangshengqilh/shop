@@ -4,14 +4,21 @@ namespace App\Http\Controllers\Order;
 
 use App\Model\CartModel;
 use App\Model\GoodsModel;
+use App\Model\OrderGoodsModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Model\OrderModel;
+use Illuminate\Support\Facades\Auth;
 
 class IndexController extends Controller
 {
     //
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
     public function index()
     {
@@ -38,9 +45,9 @@ class IndexController extends Controller
             $order_amount += $goods_info['price'] * $v['num'];
         }
 
-        //生成订单号
-        $order_sn = OrderModel::generateOrderSN();
-        echo $order_sn;
+        //echo '<pre>';print_r($list);echo '</pre>';die;
+        $order_sn = OrderModel::generateOrderSN();  //生成订单号
+
         $data = [
             'order_sn'      => $order_sn,
             'uid'           => session()->get('uid'),
@@ -48,14 +55,35 @@ class IndexController extends Controller
             'order_amount'  => $order_amount
         ];
 
+        //写入订单表
         $oid = OrderModel::insertGetId($data);
         if(!$oid){
             echo '生成订单失败';
         }
 
+        //写入订单商品表
+        foreach($list as $k=>$v){
+            OrderGoodsModel::insert(['goods_id'=>$v['goods_id'],'oid'=>$oid,'price'=>$v['price'],'num'=>$v['num']]);
+        }
+
+
         echo '下单成功,订单号：'.$oid .' 跳转支付';
+
 
         //清空购物车
         CartModel::where(['uid'=>session()->get('uid')])->delete();
+    }
+
+
+    /**
+     * 订单列表
+     */
+    public function orderList()
+    {
+        $list = OrderModel::where(['uid'=>session()->get('uid'),'is_pay'=>0])->orderBy('oid','desc')->get()->toArray();
+        $data = [
+            'list'  => $list
+        ];
+        return view('orders.list',$data);
     }
 }

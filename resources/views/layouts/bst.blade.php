@@ -26,7 +26,7 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">分类1</a></li>
+                    <li class="active"><a href="/goods/list">商品列表</a></li>
                     <li><a href="#">分类2</a></li>
                     <li><a href="#">分类3</a></li>
                 </ul>
@@ -43,6 +43,7 @@
                             <li><a href="#">One more separated link</a></li>
                         </ul>
                     </li>
+                    <li><a href="/cart">购物车</a></li>
                     <li><a href="/user/login">登录</a></li>
                     <li><a href="/user/logou">退出</a></li>
                 </ul>
