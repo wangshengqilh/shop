@@ -134,9 +134,11 @@ class WeixinController extends Controller
         $data = json_decode(file_get_contents($url),true);
         //echo '<pre>';print_r($data);echo '</pre>';
         return $data;
+
     }
 
 
 
 
 }
+
