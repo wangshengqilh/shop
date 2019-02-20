@@ -245,7 +245,7 @@ class WeixinController extends Controller
                 ],
                 [
                     "type"  => "click",      // click类型
-                    "name"  => "人工客服",
+                    "name"  => "当前时间",
                     "key"   => "kefu01"
                 ]
             ],
