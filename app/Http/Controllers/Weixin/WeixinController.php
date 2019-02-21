@@ -260,7 +260,7 @@ class WeixinController extends Controller
                 [
                     "type"  => "view",      // view类型 跳转指定 URL
                     "name"  => "百度一下",
-                    "url"   => "https://www.baidu.com"
+                    "url"   => "https://www.4399.com"
                 ],
                 [
                     "type"  => "click",      // click类型
