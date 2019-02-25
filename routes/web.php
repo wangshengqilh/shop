@@ -152,3 +152,20 @@ Route::get('/weixin/valid1','Weixin\WeixinController@validToken1');
 Route::post('/weixin/valid1','Weixin\WeixinController@wxEvent');        //接收微信服务器事件推送
 Route::post('/weixin/valid','Weixin\WeixinController@validToken');
 Route::get('/weixin/create_menu','Weixin\WeixinController@createMenu');     //创建菜单
+
+Route::get('/form/show','Weixin\WeixinController@formShow');     //表单测试
+Route::post('/form/test','Weixin\WeixinController@formTest');     //表单测试
+
+
+
+
+Route::get('/test/405','Weixin\WeixinController@http405');     //获取永久素材列表
+
+
+Route::get('/weixin/material/list','Weixin\WeixinController@materialList');     //获取永久素材列表
+Route::get('/weixin/material/upload','Weixin\WeixinController@upMaterial');     //上传永久素材
+Route::post('/weixin/material','Weixin\WeixinController@materialTest');     //创建菜单
+
+//微信聊天
+Route::get('/weixin/kefu/chat','Weixin\WeixinController@chatView');     //客服聊天
+Route::get('/weixin/chat/get_msg','Weixin\WeixinController@getChatMsg');     //获取用户聊天信息
