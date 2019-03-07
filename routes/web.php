@@ -12,11 +12,9 @@
 */
 
 Route::get('/', function () {
-    echo __FILE__;echo '</br>';
-    echo date('Y-m-d H:i:s');
-    //echo '<pre>';print_r($_SESSION);echo '</pre>';
-    //echo '<pre>';print_r($_COOKIE);echo '</pre>';
-    //return view('welcome');
+    //echo __FILE__;echo '</br>';
+    //echo date('Y-m-d H:i:s');
+    return view('welcome');
 });
 
 Route::group([
@@ -103,7 +101,11 @@ Route::middleware(['log.click'])->group(function(){
     Route::get('/test/session','Test\TestController@sessionTest');
     Route::get('/test/mid1','Test\TestController@mid1')->middleware('check.uid');        //中间件测试
     Route::get('/test/check_cookie','Test\TestController@checkCookie')->middleware('check.cookie');
+
+    Route::get('/test/url1','Test\TestController@url1');
 });
+
+Route::get('/test/end','Test\TestController@mid3')->middleware('res.end');
 
 
 
@@ -119,7 +121,6 @@ Route::get('/cart/del2/{goods_id}','Cart\IndexController@del2')->middleware('che
 //商品
 Route::get('/goods/detail/{goods_id}','Goods\IndexController@index');          //商品详情
 Route::get('/goods/list','Goods\IndexController@goodsList');          //商品列表
-Route::get('/goods/sou','Goods\IndexController@goodsSou');           //商品搜索
 
 
 //订单
@@ -143,6 +144,12 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/upload','Goods\IndexController@uploadIndex');
 Route::post('/goods/upload/pdf','Goods\IndexController@uploadPDF');
+
+
+
+//在线订座
+Route::get('/movie/seat','Movie\IndexController@index');
+
 
 //微信
 Route::get('/weixin/refresh_token','Weixin\WeixinController@refreshToken');     //刷新token
@@ -170,3 +177,23 @@ Route::post('/weixin/material','Weixin\WeixinController@materialTest');     //�
 //微信聊天
 Route::get('/weixin/kefu/chat','Weixin\WeixinController@chatView');     //客服聊天
 Route::get('/weixin/chat/get_msg','Weixin\WeixinController@getChatMsg');     //获取用户聊天信息
+
+
+//微信支付
+Route::get('/weixin/pay/test','Weixin\PayController@test');     //微信支付测试
+Route::post('/weixin/pay/notice','Weixin\PayController@notice');     //微信支付通知回调
+
+//微信登录
+Route::get('/weixin/login','Weixin\WeixinController@login');        //微信登录
+Route::get('/weixin/getcode','Weixin\WeixinController@getCode');        //接收code
+
+
+//微信 JSSDK
+
+Route::get('/weixin/jssdk/test','Weixin\WeixinController@jssdkTest');       // 测试
+
+
+
+
+
+
