@@ -106,8 +106,6 @@ class WeixinController extends Controller
                     $sub_time = $xml->CreateTime;               //扫码关注时间
                     //获取用户信息
                     $user_info = $this->getUserInfo($openid);
-$xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. 'Hello World, 现在时间'. date('Y-m-d H:i:s') .']]></Content></xml>';
-        echo $xml_response;
                     //保存用户信息
                     $u = WeixinUser::where(['openid'=>$openid])->first();
                     if($u){       //用户不存在
@@ -126,6 +124,8 @@ $xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserN
                         //var_dump($id);
                     }
 
+$xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. '欢迎关注'.']]></Content></xml>';
+        echo $xml_response;
                 }elseif($event=='CLICK'){               //click 菜单
                     if($xml->EventKey=='kefu01'){       // 根据 EventKey判断菜单
                         $this->kefu01($openid,$xml->ToUserName);
