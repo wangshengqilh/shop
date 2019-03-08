@@ -244,7 +244,9 @@ $xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserN
             Redis::setTimeout($this->redis_weixin_access_token,3600);
         }
         return $token;
-
+        $redis=new Redis();
+        $redis->connect('123.207.136.44',6379);
+        echo "Connection to server sucessfully";
     }
 
     /**
