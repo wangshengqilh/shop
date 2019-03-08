@@ -37,105 +37,6 @@ class WeixinController extends Controller
         //file_put_contents('logs/weixin.log',$str,FILE_APPEND);
         echo $_GET['echostr'];
     }
-
-    /**
-     * 接收微信服务器事件推送
-     */
-    public function wxEvent()
-    {
-        $data = file_get_contents("php://input");
-
-
-        //解析XML
-        $xml = simplexml_load_string($data);        //将 xml字符串 转换成对象
-
-        //记录日志
-        $log_str = date('Y-m-d H:i:s') . "\n" . $data . "\n<<<<<<<";
-        file_put_contents('logs/wx_event.log',$log_str,FILE_APPEND);
-
-        $event = $xml->Event;                       //事件类型
-        $openid = $xml->FromUserName;               //用户openid
-
-
-        // 处理用户发送消息
-        if(isset($xml->MsgType)){
-            if($xml->MsgType=='text'){            //用户发送文本消息
-                $msg = $xml->Content;
-                //记录聊天消息
-
-                $data = [
-                    'msg'       => $xml->Content,
-                    'msgid'     => $xml->MsgId,
-                    'openid'    => $openid,
-                    'msg_type'  => 1        // 1用户发送消息 2客服发送消息
-                ];
-
-                $id = WeixinChatModel::insertGetId($data);
-                var_dump($id);
-                //$xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. $msg. date('Y-m-d H:i:s') .']]></Content></xml>';
-
-
-                //echo $xml_response;
-            }elseif($xml->MsgType=='image'){       //用户发送图片信息
-                //视业务需求是否需要下载保存图片
-                if(1){  //下载图片素材
-                    $file_name = $this->dlWxImg($xml->MediaId);
-                    $xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. date('Y-m-d H:i:s') .']]></Content></xml>';
-                    echo $xml_response;
-
-                    //写入数据库
-                    $data = [
-                        'openid'    => $openid,
-                        'add_time'  => time(),
-                        'msg_type'  => 'image',
-                        'media_id'  => $xml->MediaId,
-                        'format'    => $xml->Format,
-                        'msg_id'    => $xml->MsgId,
-                        'local_file_name'   => $file_name
-                    ];
-
-                   $m_id = WeixinMedia::insertGetId($data);
-                   var_dump($m_id);
-                }
-            }elseif($xml->MsgType=='voice'){        //处理语音信息
-                $this->dlVoice($xml->MediaId);
-            }elseif($xml->MsgType=='event'){        //判断事件类型
-
-                if($event=='subscribe'){                        //扫码关注事件
-
-                    $sub_time = $xml->CreateTime;               //扫码关注时间
-                    //获取用户信息
-                    $user_info = $this->getUserInfo($openid);
-                    //保存用户信息
-                    $u = WeixinUser::where(['openid'=>$openid])->first();
-                    if($u){       //用户不存在
-                        //echo '用户已存在';
-                    }else{
-                        $user_data = [
-                            'openid'            => $openid,
-                            'add_time'          => time(),
-                            'nickname'          => $user_info['nickname'],
-                            'sex'               => $user_info['sex'],
-                            'headimgurl'        => $user_info['headimgurl'],
-                            'subscribe_time'    => $sub_time,
-                        ];
-
-                        $id = WeixinUser::insertGetId($user_data);      //保存用户信息
-                        //var_dump($id);
-                    }
-                    $xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. '欢迎关注'.']]></Content></xml>';
-                    echo $xml_response;
-                }elseif($event=='CLICK'){               //click 菜单
-                    if($xml->EventKey=='kefu01'){       // 根据 EventKey判断菜单
-                        $this->kefu01($openid,$xml->ToUserName);
-                    }
-                }
-
-            }
-
-        }
-    }
-
     /**
      * 客服处理
      * @param $openid   用户openid
@@ -246,21 +147,6 @@ class WeixinController extends Controller
         $redis=new Redis();
         $redis->connect('123.207.136.44',6379);
         echo "Connection to server sucessfully";
-    }
-
-    /**
-     * 获取用户信息
-     * @param $openid
-     */
-    public function getUserInfo($openid)
-    {
-        //$openid = 'oLreB1jAnJFzV_8AGWUZlfuaoQto';
-        $access_token = $this->getWXAccessToken();      //请求每一个接口必须有 access_token
-        $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token='.$access_token.'&openid='.$openid.'&lang=zh_CN';
-
-        $data = json_decode(file_get_contents($url),true);
-        //echo '<pre>';print_r($data);echo '</pre>';
-        return $data;
     }
 
     /**
@@ -622,6 +508,152 @@ class WeixinController extends Controller
         return $ticket;
 
     }
+    /**
+     * 获取用户信息
+     * @param $openid
+     */
+    public function getUserInfo($openid)
+    {
+        //$openid = 'oLreB1jAnJFzV_8AGWUZlfuaoQto';
+        $access_token = $this->getWXAccessToken();      //请求每一个接口必须有 access_token
+        $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token='.$access_token.'&openid='.$openid.'&lang=zh_CN';
+
+        $data = json_decode(file_get_contents($url),true);
+        //echo '<pre>';print_r($data);echo '</pre>';
+        return $data;
+    }
+        /**
+     * 接收微信服务器事件推送
+     */
+    public function wxEvent()
+    {
+        $data = file_get_contents("php://input");
 
 
+        //解析XML
+        $xml = simplexml_load_string($data);        //将 xml字符串 转换成对象
+
+        //记录日志
+        $log_str = date('Y-m-d H:i:s') . "\n" . $data . "\n<<<<<<<";
+        file_put_contents('logs/wx_event.log',$log_str,FILE_APPEND);
+
+        $event = $xml->Event;                       //事件类型
+        $openid = $xml->FromUserName;               //用户openid
+
+
+        // 处理用户发送消息
+        if(isset($xml->MsgType)){
+            if($xml->MsgType=='text'){            //用户发送文本消息
+                $msg = $xml->Content;
+                //记录聊天消息
+
+                $data = [
+                    'msg'       => $xml->Content,
+                    'msgid'     => $xml->MsgId,
+                    'openid'    => $openid,
+                    'msg_type'  => 1        // 1用户发送消息 2客服发送消息
+                ];
+
+                $id = WeixinChatModel::insertGetId($data);
+                var_dump($id);
+                //$xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. $msg. date('Y-m-d H:i:s') .']]></Content></xml>';
+
+
+                //echo $xml_response;
+            }elseif($xml->MsgType=='image'){       //用户发送图片信息
+                //视业务需求是否需要下载保存图片
+                if(1){  //下载图片素材
+                    $file_name = $this->dlWxImg($xml->MediaId);
+                    $xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. date('Y-m-d H:i:s') .']]></Content></xml>';
+                    echo $xml_response;
+
+                    //写入数据库
+                    $data = [
+                        'openid'    => $openid,
+                        'add_time'  => time(),
+                        'msg_type'  => 'image',
+                        'media_id'  => $xml->MediaId,
+                        'format'    => $xml->Format,
+                        'msg_id'    => $xml->MsgId,
+                        'local_file_name'   => $file_name
+                    ];
+
+                   $m_id = WeixinMedia::insertGetId($data);
+                   var_dump($m_id);
+                }
+            }elseif($xml->MsgType=='voice'){        //处理语音信息
+                $this->dlVoice($xml->MediaId);
+            }elseif($xml->MsgType=='event'){        //判断事件类型
+
+                if($event=='subscribe'){                        //扫码关注事件
+
+                    $sub_time = $xml->CreateTime;               //扫码关注时间
+                    //获取用户信息
+                    $user_info = $this->getUserInfo($openid);
+                    //保存用户信息
+                    $u = WeixinUser::where(['openid'=>$openid])->first();
+                    if($u){       //用户不存在
+                        //echo '用户已存在';
+                    }else{
+                        $user_data = [
+                            'openid'            => $openid,
+                            'add_time'          => time(),
+                            'nickname'          => $user_info['nickname'],
+                            'sex'               => $user_info['sex'],
+                            'headimgurl'        => $user_info['headimgurl'],
+                            'subscribe_time'    => $sub_time,
+                        ];
+
+                        $id = WeixinUser::insertGetId($user_data);      //保存用户信息
+                        //var_dump($id);
+                    }
+                    $xml_response = '<xml><ToUserName><![CDATA['.$openid.']]></ToUserName><FromUserName><![CDATA['.$xml->ToUserName.']]></FromUserName><CreateTime>'.time().'</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA['. '欢迎关注'.']]></Content></xml>';
+                    echo $xml_response;
+                }elseif($event=='CLICK'){               //click 菜单
+                    if($xml->EventKey=='kefu01'){       // 根据 EventKey判断菜单
+                        $this->kefu01($openid,$xml->ToUserName);
+                    }
+                }
+
+            }
+
+        }
+    }
+    // //创建标签
+    //    public function createTag($tagname=''){
+    //      $mp = $this->mp;
+    //      $where['mp_id'] = $mp['id'];
+    //      $where['tag'] = $tagname;
+    //      $data = M('tags')->where($where)->find();
+    //      if(empty($data)){
+    //        $api = 'https://api.weixin.qq.com/cgi-bin/tags/create?access_token='. getAccess_token();
+    //        $arr = array();
+    //        $arr['tag']['name'] = $tagname;
+    //        $json = json_encode($arr,JSON_UNESCAPED_UNICODE);
+    //        include APP_PATH . 'LaneWeChat/lanewechat.php';
+    //        $ret = \LaneWeChat\Core\Curl::callWebServer($api,$json,'POST');
+    //        if($ret['tag']){
+    //         $row['mp_id'] = $mp['id'];
+    //         $row['tag_id'] = $ret['tag']['id'];
+    //         $row['tag'] = $ret['tag']['name'];
+    //         M('tags')->add($row);
+    //     }
+    //    }
+    //    }
+    //     //给粉丝打标签
+    //    public function OpenidTag(){
+    //      $openid = "otkFz0rnF8Yy51K1LbWL4fwM7wSs";
+    //      //给粉丝打标签
+    //      $api = "https://api.weixin.qq.com/cgi-bin/tags/members/batchtagging?access_token=" . getAccess_token();
+    //        $arr['openid_list'] = array($openid);
+    //        $arr['tagid'] = 109;
+    //        $json = json_encode($arr);
+    //        include APP_PATH . 'LaneWeChat/lanewechat.php';
+    //        $ret = \LaneWeChat\Core\Curl::callWebServer($api,$json,'POST');
+    //        print_r($ret);
+    //    }
+    //    //拉入黑名单
+    //    public function hei(){
+
+    //    }
 }
