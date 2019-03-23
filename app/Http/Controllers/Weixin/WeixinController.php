@@ -539,9 +539,6 @@ class WeixinController extends Controller
 
         $event = $xml->Event;                       //事件类型
         $openid = $xml->FromUserName;               //用户openid
-
-
-        // 处理用户发送消息
         if(isset($xml->MsgType)){
             if($xml->MsgType=='text'){            //用户发送文本消息
                 $msg = $xml->Content;

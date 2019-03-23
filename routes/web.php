@@ -192,7 +192,13 @@ Route::get('/weixin/getcode','Weixin\WeixinController@getCode');        //接收
 
 Route::get('/weixin/jssdk/test','Weixin\WeixinController@jssdkTest');       // 测试
 
+//Route::get('/token','Wechat\WechatController@Token'); #首次接入
+Route::get('/token','Wechat\WechatController@access_token'); #获取access_token
+Route::get('/form','Wechat\WechatController@form'); #获取access_token
+Route::post('/form','Wechat\WechatController@createMenu'); #获取access_token
+Route::any('/createMenu','Wechat\WechatController@createMenu'); #自定义菜单
 
+Route::any('test','Login\LoginController@test');
 
 
 
